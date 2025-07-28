@@ -49,18 +49,35 @@
     </div>
 
     <script>
-      function pingAdmin() {
-        const tg = window.Telegram.WebApp;
+      const tg = window.Telegram.WebApp;
+      const chatId = tg.initDataUnsafe?.user?.id;
 
-        const user = tg.initDataUnsafe?.user;
-
-        if (user) {
-          alert(`Користувач ${user.first_name} надіслав ping!`);
-        } else {
-          alert("Повідомлення надіслано адміністратору!");
+      async function pingAdmin() {
+        if (!chatId) {
+          alert("Помилка: не вдалося отримати ID користувача");
+          return;
         }
 
-        tg.close();
+        try {
+          const response = await fetch("https://ping-bot-project-production.up.railway.app/web-data", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chatId: chatId,
+              message: "Ping Admin!",
+            }),
+          });
+
+          if (response.ok) {
+            alert("Ping відправлено!");
+          } else {
+            alert("Помилка сервера");
+          }
+        } catch (error) {
+          alert("Помилка відправки: " + error.message);
+        }
       }
     </script>
   </body>
